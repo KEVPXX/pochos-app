@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pochos Restaurant</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a0a00;font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.wrap{text-align:center;padding:32px 24px;width:100%;max-width:360px}
+.logo{width:100px;height:100px;border-radius:22px;margin:0 auto 16px;display:block}
+.title{font-size:28px;font-weight:900;color:#FF6B1A}
+.title span{color:#fff}
+.sub{font-size:12px;color:#666;margin:6px 0 28px;letter-spacing:2px;text-transform:uppercase}
+/* Login box */
+.login-box{background:#1e1008;border:1px solid #333;border-radius:20px;padding:24px;margin-bottom:16px}
+.login-lbl{font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.pin-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+.pin-input{width:48px;height:48px;text-align:center;font-size:20px;font-weight:700;border:2px solid #444;border-radius:12px;background:#120800;color:#fff;font-family:'DM Sans',sans-serif}
+.pin-input:focus{border-color:#FF6B1A;outline:none}
+.btn-enter{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#FF6B1A,#E55A0A);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px}
+.pin-err{color:#E74C3C;font-size:12px;min-height:16px;text-align:center}
+/* Cards */
+.cards{display:flex;flex-direction:column;gap:12px;display:none}
+.card{display:block;padding:20px;border-radius:16px;border:1.5px solid #333;background:#1e1008;text-decoration:none;cursor:pointer;text-align:center}
+.card:active{border-color:#FF6B1A}
+.card-icon{font-size:36px;margin-bottom:8px}
+.card-title{font-size:17px;font-weight:800;color:#fff;margin-bottom:2px}
+.card-sub{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px}
+.logout{margin-top:16px;font-size:11px;color:#555;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img src="icon-192.png" class="logo" alt="Pochos">
+  <div class="title">Pocho's <span>Restaurant</span></div>
+  <div class="sub">Sistema POS</div>
+
+  <!-- Login PIN dueño -->
+  <div class="login-box" id="loginBox">
+    <div class="login-lbl">Acceso exclusivo dueño</div>
+    <div class="pin-row">
+      <input class="pin-input" type="password" maxlength="1" id="p0" oninput="pf(this,'p1')" inputmode="numeric">
+      <input class="pin-input" type="password" maxlength="1" id="p1" oninput="pf(this,'p2')" onkeydown="pb(event,'p0')" inputmode="numeric">
+      <input class="pin-input" type="password" maxlength="1" id="p2" oninput="pf(this,'p3')" onkeydown="pb(event,'p1')" inputmode="numeric">
+      <input class="pin-input" type="password" maxlength="1" id="p3" oninput="chk()" onkeydown="pb(event,'p2')" inputmode="numeric">
+    </div>
+    <button class="btn-enter" onclick="login()">Entrar</button>
+    <div class="pin-err" id="pinErr"></div>
+  </div>
+
+  <!-- Cards visibles solo tras login -->
+  <div class="cards" id="cards">
+    <a class="card" href="dueno.html">
+      <div class="card-icon">👑</div>
+      <div class="card-title">Panel Dueño</div>
+      <div class="card-sub">Control total</div>
+    </a>
+    <a class="card" href="admin.html">
+      <div class="card-icon">📋</div>
+      <div class="card-title">Panel Admin</div>
+      <div class="card-sub">Turno día / noche</div>
+    </a>
+    <div class="logout" onclick="logout()">Cerrar sesión</div>
+  </div>
+</div>
+<script>
+const PIN='pch5';
+function pf(el,nxt){if(el.value&&nxt)document.getElementById(nxt).focus();}
+function pb(e,prv){if(e.key==='Backspace'&&!e.target.value&&prv)document.getElementById(prv).focus();}
+function chk(){const p=['p0','p1','p2','p3'].map(id=>document.getElementById(id).value).join('');if(p.length===4)login();}
+function login(){
+  const p=['p0','p1','p2','p3'].map(id=>document.getElementById(id).value).join('');
+  if(p===PIN){
+    sessionStorage.setItem('pochos_owner','1');
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('cards').style.display='flex';
+  } else {
+    document.getElementById('pinErr').textContent='PIN incorrecto';
+    ['p0','p1','p2','p3'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('p0').focus();
+  }
+}
+function logout(){
+  sessionStorage.removeItem('pochos_owner');
+  document.getElementById('loginBox').style.display='block';
+  document.getElementById('cards').style.display='none';
+  ['p0','p1','p2','p3'].forEach(id=>document.getElementById(id).value='');
+}
+// Si ya estaba autenticado en esta sesión
+if(sessionStorage.getItem('pochos_owner')==='1'){
+  document.getElementById('loginBox').style.display='none';
+  document.getElementById('cards').style.display='flex';
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js');});
+}
+</script>
+</body>
+</html>
